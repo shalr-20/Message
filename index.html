@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Be My Valentine 💝</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="emojiLayer" aria-hidden="true"></div>
+
+<div class="container">
+
+  <h1>Hey My Love 💕</h1>
+
+  <p class="intro">
+    You’ve been on my mind in the sweetest way, and I just can’t wait any longer.
+    I may not be perfect with words, but I know I really love you and everything about you,
+    so with all my heart, I just had to ask…
+  </p>
+
+  <div class="gift" onclick="openGift()">
+    🎁
+    <p>Tap to open</p>
+  </div>
+
+  <div id="question" class="hidden">
+
+    <div class="valentine-box">
+      <h2>Will you be my Valentine? 💖</h2>
+    </div>
+
+    <div class="buttons">
+      <button id="yes" class="yes" onclick="sayYes()">YES 💕
+        <span class="hearts" aria-hidden="true">
+          <span class="heart"></span>
+          <span class="heart"></span>
+          <span class="heart"></span>
+        </span>
+      </button>
+      <button id="no">NO 😭</button>
+    </div>
+
+    <div id="celebration" class="hidden">
+      <canvas id="fireworksCanvas"></canvas>
+      <div class="celebration-content">
+        <p class="celebration-text">A Quick Message! Are you ready?</p>
+        <button id="letsGo">Let's go</button>
+      </div>
+    </div> 
+
+    <h2 id="message"></h2>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
