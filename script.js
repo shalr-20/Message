@@ -103,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const letsBtn = document.getElementById('letsGo');
     if (letsBtn) {
       letsBtn.addEventListener('click', function() {
-        // User clicked Let's go — play a short preview video then go to local trailer page
-        playPreviewVideo('vdo.mp4');
+        // User clicked Let's go — navigate to heist page
+        window.location.href = 'heist.html';
       }, { once: true });
     }
   };
@@ -114,108 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
     celebration.addEventListener('click', function(e){ if (e.target === celebration) { celebration.classList.add('hidden'); cancelAnimationFrame(anim); } });
   }
 
-  // playPreviewVideo: create an overlay with a short video, navigate to trailer after it ends
-  function playPreviewVideo(src) {
-    // create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'video-overlay';
-    overlay.innerHTML = `
-      <div class="video-content" role="dialog" aria-modal="true" aria-label="Trailer preview">
-        <video id="previewVideo" autoplay muted playsinline>
-          <source src="${src}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    `;
-    document.body.appendChild(overlay);
 
-    const video = document.getElementById('previewVideo');
-
-    // prevent Escape key from interrupting playback
-    function keyHandler(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); } }
-    window.addEventListener('keydown', keyHandler);
-
-    function cleanupAndGo() {
-      // remove key listener when we leave
-      window.removeEventListener('keydown', keyHandler);
-      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      celebration.classList.add('hidden');
-      cancelAnimationFrame(anim);
-      window.location.href = 'heist.html';
-    }
-
-    if (video) {
-      // disable native controls & prevent direct interaction
-      video.controls = false;
-      video.removeAttribute('controls');
-      try { video.controlsList = 'nodownload nofullscreen noremoteplayback'; } catch(e){}
-      try { video.disablePictureInPicture = true; } catch(e){}
-      video.setAttribute('playsinline', '');
-      video.style.pointerEvents = 'none';
-      video.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-
-      // Try to ensure audio plays unmuted by resuming the AudioContext (helps unlock audio on some browsers)
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          window.__unlockedAudioCtx = window.__unlockedAudioCtx || new AudioCtx();
-          window.__unlockedAudioCtx.resume().catch(()=>{});
-        }
-      } catch(e){}
-
-      // request unmuted playback immediately (user click triggered this function)
-      video.muted = false;
-      video.volume = 1.0;
-      const playPromise = video.play();
-
-      // helper to create a visible 'Tap to play with sound' button when autoplay with sound is blocked
-      function showUnmuteButton() {
-        if (document.getElementById('unmutePlay')) return;
-        const btn = document.createElement('button');
-        btn.id = 'unmutePlay';
-        btn.className = 'unmute-play';
-        btn.textContent = 'Tap to play with sound';
-        overlay.appendChild(btn);
-        btn.focus();
-        btn.addEventListener('click', function() {
-          try { if (window.__unlockedAudioCtx) window.__unlockedAudioCtx.resume().catch(()=>{}); } catch(e){}
-          video.muted = false;
-          video.volume = 1.0;
-          video.play().catch(()=>{});
-          if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-        }, { once: true });
-      }
-
-      if (playPromise && playPromise.catch) {
-        playPromise.catch(() => {
-          // autoplay with sound blocked — show the fallback UI
-          try { if (window.__unlockedAudioCtx) window.__unlockedAudioCtx.resume().catch(()=>{}); } catch(e){}
-          showUnmuteButton();
-        });
-      }
-
-      // some browsers pause even when play() resolves; if video is paused shortly after, show button
-      setTimeout(() => { if (video.paused && !video.ended) showUnmuteButton(); }, 300);
-
-      // prevent seeking/skipping by restoring time
-      let lastKnownTime = 0;
-      video.addEventListener('timeupdate', function() { lastKnownTime = video.currentTime; });
-      video.addEventListener('seeking', function() {
-        try { video.currentTime = lastKnownTime; } catch(e){}
-      });
-
-      // if user somehow pauses, try to resume (unless ended)
-      video.addEventListener('pause', function() { if (!video.ended) video.play().catch(()=>{}); });
-
-      // when finished navigate
-      video.addEventListener('ended', cleanupAndGo);
-    }
-
-    // ignore clicks on overlay — user cannot skip by clicking outside
-    overlay.addEventListener('click', function(e) {
-      e.stopPropagation();
-    });
-  }
 
   /* -----------------------------
      Floating decorative emojis
